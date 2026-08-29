@@ -1,4 +1,4 @@
-name: build 1800 openwrt
+name: build ipq60xx openwrt
 
 on:
   workflow_call:
@@ -148,6 +148,46 @@ jobs:
           sed -i 's/REPO_BRANCH=".*"/REPO_BRANCH="main"/' $DIY_SCRIPT
           chmod +x $DIY_SCRIPT && ./$DIY_SCRIPT
 
+      - name: Check Build Configuration
+        run: |
+          cd $OPENWRT_PATH
+
+          echo "=========================================="
+          echo "当前 OpenWrt 编译配置"
+          echo "=========================================="
+
+          echo ""
+          echo "OPENWRT_PATH:"
+          echo "$OPENWRT_PATH"
+
+          echo ""
+          echo "CONFIG_FILE:"
+          echo "$GITHUB_WORKSPACE/$CONFIG_FILE"
+
+          echo ""
+          echo "TARGET:"
+          grep '^CONFIG_TARGET_' .config || true
+
+          echo ""
+          echo "PACKAGE 数量:"
+          grep '^CONFIG_PACKAGE_' .config | wc -l
+
+          echo ""
+          echo "重要软件包:"
+          grep '^CONFIG_PACKAGE_' .config | grep -E \
+            'luci|passwall|sing-box|xray|dae|docker|wireguard|kmod|ddns|alist|tailscale' \
+            || true
+
+          echo ""
+          echo "WIFI 相关:"
+          grep '^CONFIG_PACKAGE_.*wifi\|^CONFIG_PACKAGE_.*wpad\|^CONFIG_PACKAGE_.*hostapd' .config \
+            || true
+
+          echo ""
+          echo "=========================================="
+          echo "配置检查完成"
+          echo "=========================================="
+
       - name: Compile Toolchain
         if: env.REBUILD_TOOLCHAIN == 'true'
         id: toolchain
@@ -199,7 +239,7 @@ jobs:
           df -h && cd $OPENWRT_PATH
           du -h --max-depth=1
           echo "==============================="
-          cd $OPENWRT_PATH/bin/targets/*/* && ls
+          cd $OPENWRT_PATH/bin/targets/*/* && ls -lh
           echo "==============================="
           sed '/^$/d' $OPENWRT_PATH/.config > config.txt
           cat config.buildinfo
