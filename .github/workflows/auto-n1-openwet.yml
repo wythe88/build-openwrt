@@ -1,4 +1,4 @@
-name: build armv8 openwrt
+name: build n1 openwrt
 
 # 允许 GitHub Actions 使用 GITHUB_TOKEN 创建/修改 Release
 permissions:
