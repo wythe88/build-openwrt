@@ -1,4 +1,4 @@
-name: build ax1800pro-openwrt
+name: build ax1800pro openwrt
 
 on:
 workflow_call:
